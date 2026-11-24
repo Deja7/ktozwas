@@ -1,17 +1,24 @@
 import {io} from "https://cdn.socket.io/4.8.0/socket.io.esm.min.js";
-//import {io} from "/socket.js";
 const CON = $("#content");
 function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 genSesKey();
 console.log(localStorage.getItem("SESSIONID"));
 
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 let PAGES;
-await fetch(`http://localhost:8000/pages.json`)
+await fetch(`/pages.json`)
     .then((response) => response.json())
     .then((json) => PAGES = json);
-//console.log(PAGES);
 
-const socket = io(`http://localhost:3000`, {
+const socket = io({
     auth:{
         token: localStorage.getItem("SESSIONID")
     }
@@ -45,22 +52,33 @@ socket.on('menu', async ()=>{
     await menu();
 })
 
+function bindStartGame() {
+    $("#start-game").click(() => {
+        const time = Number($("#settings-time").val());
+        const count = Number($("#settings-count").val());
+        const level = [$("#easy").is(':checked'), $("#mid").is(':checked'), $("#hard").is(':checked')];
+        if (level[0] || level[1] || level[2])
+            socket.emit('startrequest', time, count, level);
+        else alert("Wybierz poziom pytań!");
+    });
+}
+
 async function menu(){
     $("#leave-room").hide();
     $("#undo").hide();
     await loadCON("menu");
 
-    if(localStorage.getItem("NAME") === null) {}
+    if(localStorage.getItem("NAME") !== null)
         $("#playerName").val(localStorage.getItem("NAME"));
 
 
     //host join
     $("#create-game").click(async ()=>{
-        const name = $("#playerName").val();
+        const name = $("#playerName").val().trim();
         if(name.length > 0) {
             localStorage.setItem("NAME", name);
             $("#undo").hide();
-            console.log($("#playerName").val());
+            console.log(name);
             socket.emit('newroom', name, async (callback) => {
                 //roomID=callback;
                 console.log(callback);
@@ -70,15 +88,7 @@ async function menu(){
                 $("#gamecode").text(`Podaj znajomym kod ${callback}`);
                 $("#foot").text(`Pokój: ${callback}`);
                 isHost = true;
-                $("#start-game").click(() => {
-                    const time = $("#settings-time").val();
-                    const count = $("#settings-count").val();
-                    const level = [$("#easy").is(':checked'), $("#mid").is(':checked'), $("#hard").is(':checked')];
-                    //console.log(`${time}, ${count}, ${level}`)
-                    if (level[0] || level[1] || level[2])
-                        socket.emit('startrequest', time, count, level);
-                    else alert("Wybierz poziom pytań!");
-                })
+                bindStartGame();
             })
         }
         else{
@@ -88,7 +98,7 @@ async function menu(){
 
     //guest join
     $("#join-game").click(async ()=>{
-        const name = $("#playerName").val()
+        const name = $("#playerName").val().trim();
         if(name.length > 0) {
             localStorage.setItem("NAME", name);
             await loadCON("guest-login")
@@ -106,7 +116,7 @@ async function menu(){
                         $("#foot").text(`Pokój: ${roomID}`);
                         location.reload();
                     } else {
-                        alert("Błędny kod");
+                        alert("Błędny kod lub zajęte imię");
                     }
                 });
             });
@@ -147,9 +157,7 @@ socket.on('queue', async (ROOM)=>{
         $("#gamecode").text(`Podaj znajomym kod ${ROOM}`);
         $("#foot").text(`Pokój: ${ROOM}`);
         isHost = true;
-        $("#start-game").click(()=>{
-            socket.emit('startrequest');
-        })
+        bindStartGame();
     }
     else{
         await loadCON("guest-queue");
@@ -179,7 +187,7 @@ socket.on('queue', async (ROOM)=>{
 socket.on('players-update', (players)=>{
     let S = "";
     for(let i = 0; i < players.length; i++){
-        S+=`<div class="player-frame"><h2 class="noslide inline">${players[i]}</h2>`;
+        S+=`<div class="player-frame"><h2 class="noslide inline">${escapeHtml(players[i])}</h2>`;
         if(isHost && i>0)S+=`<button class="button-none kick noslide inline" id="kick${i}">
 <img src="media/close.png" alt="close" width="20" class="noslide"></button>`;
         S+=`</div>`
@@ -187,7 +195,7 @@ socket.on('players-update', (players)=>{
     $("#queue-players").html(S);
     for(let i = 0; i < players.length; i++) {
         $(`#kick${i}`).click(()=>{
-            socket.emit('kick', `${i.toString()}`);
+            socket.emit('kick', i);
         });
     }
 });
@@ -227,12 +235,10 @@ socket.on('question',async(question, players, currentQ) => {
     $("#players").html(renderRadios(players));
     $("#confirm").click(()=>{
         const vote = parseInt($("input[name='RADIO']:checked").val());
-        if(Number.isInteger(vote) && vote >= 0 && vote <= players.length) {
+        if(Number.isInteger(vote) && vote >= 0 && vote < players.length) {
             loadCON("await-results");
             console.log(vote);
             socket.emit('vote', vote);
-            //socket.emit('response', $("input[name='RADIO']:checked").val());
-            //CON.html(`<h1>Twój głos: ${players[$('input[name="RADIO"]:checked').val()]}</h1><h1>Czekaj na wyniki!</h1>`);
         }
         else
             alert("Wybierz kogoś!");
@@ -273,18 +279,9 @@ $("#leave-room").click(()=>{
     }
 });
 
-async function loadCON2(file){
-    return new Promise(async (resolve) => {
-        CON.load(`shards/${file}`, ()=>{
-            resolve();
-        });
-    });
-}
-
 async function loadCON(file){
     return new Promise(async (resolve) => {
         await CON.html(PAGES[file]);
-        //console.log(PAGES[file]);
         resolve();
     });
 }
@@ -292,7 +289,7 @@ async function loadCON(file){
 function renderRadios(players){
     let S="";
     for(let i = 0; i < players.length; i++){
-        S+=`<input id="${i}" name="RADIO" value="${i}" type="radio" class="none"><label for="${i}" class="RADIO  noslide">${players[i]}</label>`;
+        S+=`<input id="${i}" name="RADIO" value="${i}" type="radio" class="none"><label for="${i}" class="RADIO  noslide">${escapeHtml(players[i])}</label>`;
     }
     return S;
 }
@@ -300,12 +297,13 @@ function renderRadios(players){
 function renderResults(results){
     let S="<h1>Wyniki</h1><div id='results'>";
     for(let i = 0; i < Object.keys(results).length; i++){
+        const name = escapeHtml(Object.keys(results)[i]);
         if(Object.values(results)[i].drinks == 1){
             S+=`<div class="player-drinks"><img src="media/shot2.png" alt="" width="20" height = "20" class="inline noslide">
-            <h2 class="inline">${Object.keys(results)[i]}: ${Object.values(results)[i]["voteCount"]}</h2></div>`;
+            <h2 class="inline">${name}: ${Object.values(results)[i]["voteCount"]}</h2></div>`;
         }
         else{
-            S+=`<div><h2 class="inline">${Object.keys(results)[i]}: ${Object.values(results)[i]["voteCount"]}</h2></div>`;
+            S+=`<div><h2 class="inline">${name}: ${Object.values(results)[i]["voteCount"]}</h2></div>`;
         }
     }
     S+=`</div>`
@@ -317,12 +315,13 @@ function renderResults(results){
 function renderEndResults(results){
     let S = "";
     for(let i = 0; i < Object.keys(results).length; i++){
+        const name = escapeHtml(Object.keys(results)[i]);
         if(Object.values(results)[i].drinks == 1){
-            S+=`<div class="player-drinks"><h2 class="inline">${Object.keys(results)[i]}: ${Object.values(results)[i]["points"]}</h2>
+            S+=`<div class="player-drinks"><h2 class="inline">${name}: ${Object.values(results)[i]["points"]}</h2>
             <img src="media/shot2.png" alt="" width="20" height = "20" class="inline noslide"></div>`;
         }
         else{
-            S+=`<div><h2 class="inline">${Object.keys(results)[i]}: ${Object.values(results)[i]["voteCount"]}</h2></div>`;
+            S+=`<div><h2 class="inline">${name}: ${Object.values(results)[i]["points"]}</h2></div>`;
         }
     }
     return S;

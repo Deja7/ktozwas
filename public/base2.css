@@ -1,17 +1,17 @@
 body{
-    //background-color: rgb(14, 13, 13);
+    /* background-color: rgb(14, 13, 13); */
     background: linear-gradient(to right, #8e2de2, #4a00e0);
     font-family:"Josefin Sans", sans-serif;
     padding:0;
     margin:0;
-//user-select: none;
+    /* user-select: none; */
     transition:0.3s;
 }
 .button1{
     margin:30px auto;
     width:80%;
-    //background:none;
-    //border:2px solid rgb(190, 202, 230);
+    /* background:none; */
+    /* border:2px solid rgb(190, 202, 230); */
     border:none;
     box-shadow: 0 0 5px #4d2ea1;
     border-radius:10px;
@@ -113,7 +113,7 @@ a{
 #results > div{
     margin:10px auto;
     display:block;
-    //border:2px solid rgb(77, 149, 22);
+    /* border:2px solid rgb(77, 149, 22); */
     border-radius:15px;
     text-align:center;
 }
@@ -123,7 +123,7 @@ label.RADIO{
     text-align:center;
     margin:10px auto;
     padding-top:5px;
-    //border:2px solid rgb(77, 149, 22);
+    /* border:2px solid rgb(77, 149, 22); */
     background-color:rgba(255,255,255,0.1);
     color:rgb(221, 221, 237);
     border-radius:15px;
@@ -328,7 +328,7 @@ label.pack{
     text-align:center;
     margin:5px 15px 5px 15px;
     display:inline-block;
-    //transform-origin: bottom;
+    /* transform-origin: bottom; */
     transition: 0.5s;
     border-radius:3px;
     opacity:0.7;
@@ -368,9 +368,9 @@ input[type="checkbox"]{
     width:80vw;
 
     height:fit-content;
-    //min-height:60vh;
+    /* min-height:60vh; */
 
-    //border:2px solid black;
+    /* border:2px solid black; */
     border-radius:15px;
     background-color:rgba(0, 0,0, 0.5);
     box-shadow: 0 0 10px black;
@@ -408,7 +408,7 @@ input[type="checkbox"]{
     padding:0.1em;
     font-size:1em;
     color: rgb(216, 223, 234);
-    //backdrop-filter: blur(20px);
+    /* backdrop-filter: blur(20px); */
     transition:0.5s;
 }
 .hide{
@@ -424,7 +424,7 @@ input[type="checkbox"]{
     padding:2px;
 
     border-radius:5px;
-    background-color: rgba(154, 76, 2510,0.7);
+    background-color: rgba(154, 76, 251, 0.7);
     box-shadow: 0 0 5px black;
 }
 .button2{
