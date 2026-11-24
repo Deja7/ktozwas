@@ -298,8 +298,8 @@ function renderResults(results){
     let S="<h1>Wyniki</h1><div id='results'>";
     for(let i = 0; i < Object.keys(results).length; i++){
         const name = escapeHtml(Object.keys(results)[i]);
-        if(Object.values(results)[i].drinks == 1){
-            S+=`<div class="player-drinks"><img src="media/shot2.png" alt="" width="20" height = "20" class="inline noslide">
+        if(Object.values(results)[i].winner == 1){
+            S+=`<div class="player-winner"><img src="media/star.svg" alt="" width="20" height="20" class="inline noslide">
             <h2 class="inline">${name}: ${Object.values(results)[i]["voteCount"]}</h2></div>`;
         }
         else{
@@ -316,9 +316,9 @@ function renderEndResults(results){
     let S = "";
     for(let i = 0; i < Object.keys(results).length; i++){
         const name = escapeHtml(Object.keys(results)[i]);
-        if(Object.values(results)[i].drinks == 1){
-            S+=`<div class="player-drinks"><h2 class="inline">${name}: ${Object.values(results)[i]["points"]}</h2>
-            <img src="media/shot2.png" alt="" width="20" height = "20" class="inline noslide"></div>`;
+        if(Object.values(results)[i].winner == 1){
+            S+=`<div class="player-winner"><h2 class="inline">${name}: ${Object.values(results)[i]["points"]}</h2>
+            <img src="media/star.svg" alt="" width="20" height="20" class="inline noslide"></div>`;
         }
         else{
             S+=`<div><h2 class="inline">${name}: ${Object.values(results)[i]["points"]}</h2></div>`;

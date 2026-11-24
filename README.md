@@ -1,4 +1,4 @@
-# Kto Pije? — Real-Time Multiplayer Web Party Game
+# Kto z Was? — Real-Time Multiplayer Web Party Game
 
 A real-time multiplayer *"Most Likely To"* web party game built for mobile and desktop browsers. Powered by a **client–server architecture** with bidirectional **WebSocket (Socket.IO)** communication, room-based state management, and automatic session restoration across page reloads.
 
@@ -58,7 +58,7 @@ stateDiagram-v2
 ## Project Structure
 
 ```text
-ktopije/
+kto-z-was/
 ├── server.js           # Express HTTP server, Socket.IO handlers, game loop, and room lifecycle
 ├── package.json        # Project metadata, scripts, and dependencies
 ├── easy.txt            # Easy question pack (33 questions)
@@ -69,7 +69,8 @@ ktopije/
     ├── client2.js      # Client logic, Socket.IO event listeners, and view rendering
     ├── pages.json      # HTML view templates (menu, lobby, voting, tutorial, end stats)
     ├── base2.css       # Responsive styles and CSS animations
-    └── media/          # UI icons and visual assets
+    ├── favicon.svg     # Vector app icon
+    └── media/          # UI icons and SVG visual assets
 ```
 
 ---
@@ -84,7 +85,7 @@ ktopije/
 
 ```bash
 git clone <repository-url>
-cd ktopije
+cd kto-z-was
 npm install
 npm start
 ```

@@ -378,14 +378,14 @@ async function runGame(roomID, socket){
             resOut[rooms.get(roomID).names[i]] = { "voteCount": results[i] };
         resOut = sortByPoints(resOut);
 
-        //set who drinks
+        //set round winners
         let maxPts = results[0];
         for(let i=0; i<results.length; i++)
             if(results[i] > maxPts) maxPts = results[i];
         for (let i = 0; i < rooms.get(roomID).names.length; i++)
             if(resOut[rooms.get(roomID).names[i]]["voteCount"] === maxPts)
-                resOut[rooms.get(roomID).names[i]]["drinks"] = 1;
-            else resOut[rooms.get(roomID).names[i]]["drinks"] = 0;
+                resOut[rooms.get(roomID).names[i]]["winner"] = 1;
+            else resOut[rooms.get(roomID).names[i]]["winner"] = 0;
 
         console.log(JSON.stringify(resOut));
         rooms.get(roomID).sorted = resOut;
@@ -406,7 +406,7 @@ async function runGame(roomID, socket){
             const name = sessions.get(key).name
             endRes[name] = {
                 "points": val,
-                "drinks": 1
+                "winner": 1
             };
         }
     })
